@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import math
 
+# Function to calculate the exercise angle
 def calculate_angle(a, b, c):
     a = [a.x, a.y]
     b = [b.x, b.y]
@@ -23,10 +24,12 @@ def calculate_angle(a, b, c):
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+# Load the video and initialise pose model
 cap = cv2.VideoCapture(r"C:\Users\harsh\OneDrive\Desktop\Self-Care-Chatbot\Data\pushup_data\pushup_5.mp4")
 rep_count = 0
 stage = None
 
+# Set a pose detection loop
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
         ret, frame = cap.read()
