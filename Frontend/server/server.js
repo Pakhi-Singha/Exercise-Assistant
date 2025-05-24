@@ -13,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
+//Replace username and password with your actual MongoDB Atlas credentials.
 const MONGODB_URI = 'mongodb+srv://username:password@practicecluster.ieexw.mongodb.net/?retryWrites=true&w=majority&appName=PracticeCluster';
 
 mongoose.connect(MONGODB_URI)
