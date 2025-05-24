@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-const MONGODB_URI = 'mongodb+srv://harshakumarsm:admin123@practicecluster.ieexw.mongodb.net/?retryWrites=true&w=majority&appName=PracticeCluster';
+const MONGODB_URI = 'mongodb+srv://username:password@practicecluster.ieexw.mongodb.net/?retryWrites=true&w=majority&appName=PracticeCluster';
 
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
