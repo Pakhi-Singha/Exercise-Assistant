@@ -161,326 +161,220 @@ def Deadlift(landmarks, stage, rep_count, view="side"):
     print(f"Knee Angle: {avg_knee_angle:.2f}, Back Angle: {avg_back_angle:.2f}, Stage: {stage}")
     return stage, rep_count, avg_knee_angle, avg_back_angle
 
-def BicepCurl(landmarks, stage, rep_count, side):
-    # Helper function to check visibility
+def GluteBridge(landmarks, stage, rep_count):
     def visible(landmark):
         return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
 
-    # Thresholds
-    curl_down_thresh = 160  # Arm extended
-    curl_up_thresh = 50     # Arm fully curled
-
-    def process_arm(shoulder, elbow, wrist, arm_stage, arm_count):
-        if min(visible(shoulder), visible(elbow), visible(wrist)) < 0.5:
-            return arm_stage, arm_count, 0
-
-        elbow_angle = calculate_angle(shoulder, elbow, wrist)
-
-        if arm_stage is None:
-            if elbow_angle > curl_down_thresh:
-                arm_stage = "down"
-            elif elbow_angle < curl_up_thresh:
-                arm_stage = "up"
-
-        if arm_stage == "down" and elbow_angle < curl_up_thresh:
-            arm_stage = "up"
-            arm_count += 1
-            print(f"Bicep Curl rep count: {arm_count}")
-
-        elif arm_stage == "up" and elbow_angle > curl_down_thresh:
-            arm_stage = "down"
-
-        return arm_stage, arm_count, elbow_angle
-
-    # Handle both arms
-    if side.lower() == "both":
-        # stage and rep_count are expected as dictionaries: {"left": ..., "right": ...}
-        l_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        l_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-        l_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-
-        r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        r_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-        r_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-
-        stage['left'], rep_count['left'], l_angle = process_arm(l_shoulder, l_elbow, l_wrist, stage.get('left'), rep_count.get('left'))
-        stage['right'], rep_count['right'], r_angle = process_arm(r_shoulder, r_elbow, r_wrist, stage.get('right'), rep_count.get('right'))
-
-        print(f"Left Angle: {l_angle:.2f}, Right Angle: {r_angle:.2f}")
-        return stage, rep_count, l_angle, r_angle
-
-    # Handle single arm
-    elif side.lower() in ["left", "right"]:
-        if side.lower() == "left":
-            shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-            elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-            wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-        else:
-            shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-            elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-            wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-
-        stage, rep_count, angle = process_arm(shoulder, elbow, wrist, stage, rep_count)
-        return stage, rep_count, angle
-    
-def GluteBridge(landmarks, stage, rep_count, view="side"):
-    # Helper function to check visibility
-    def visible(landmark):
-        return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
-
-    # Extract key landmarks
-    l_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-    l_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-    l_knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
-
-    r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-    r_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
-    r_knee = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value]
+    lh = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
+    lk = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
+    ls = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
 
     # Check visibility
-    if min(
-        visible(l_shoulder), visible(l_hip), visible(l_knee),
-        visible(r_shoulder), visible(r_hip), visible(r_knee)
-    ) < 0.5:
-        return stage, rep_count, 0, 0
+    min_vis = 0.6
+    if visible(lh) < min_vis or visible(lk) < min_vis or visible(ls) < min_vis:
+        # Not visible enough; skip frame
+        return stage, rep_count, 0
 
-    # Calculate hip angle (shoulder–hip–knee)
-    left_hip_angle = calculate_angle(l_shoulder, l_hip, l_knee)
-    right_hip_angle = calculate_angle(r_shoulder, r_hip, r_knee)
-    avg_hip_angle = (left_hip_angle + right_hip_angle) / 2
+    hip_angle = calculate_angle(ls, lh, lk)  # Angle at hip joint (shoulder-hip-knee)
 
-    # Thresholds (adjust as needed based on test footage)
-    down_thresh = 100   # Hips dropped
-    up_thresh = 140     # Hips extended
+    # Thresholds to define up/down positions (tweak as needed)
+    up_thresh = 170  # Hip nearly straight (lying flat)
+    down_thresh = 130  # Hip bent (bridge up)
 
-    # Initial stage detection
     if stage is None:
-        if avg_hip_angle > up_thresh:
-            stage = "up"
-        elif avg_hip_angle < down_thresh:
-            stage = "down"
+        # Initialize stage
+        if hip_angle < up_thresh:
+            stage = "down"  # Lying flat
+        elif hip_angle > down_thresh:
+            stage = "up"    # Bridge raised
 
-    # Rep counting logic
-    if stage == "down" and avg_hip_angle > up_thresh:
+    # Count reps based on stage transitions
+    if stage == "down" and hip_angle < down_thresh:
         stage = "up"
+    elif stage == "up" and hip_angle > up_thresh:
+        stage = "down"
         rep_count += 1
         print(f"Glute Bridge rep count: {rep_count}")
 
-    elif stage == "up" and avg_hip_angle < down_thresh:
-        stage = "down"
+    return stage, rep_count, hip_angle
 
-    print(f"Hip Angle: {avg_hip_angle:.2f}, Stage: {stage}")
-    return stage, rep_count, avg_hip_angle, 0  # "0" is a placeholder for symmetry with others
-
-def Crunches(landmarks, stage, rep_count):
-    # Helper to check visibility
+def LyingLegRaise(landmarks, stage, rep_count):
     def visible(landmark):
         return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
 
-    # Use shoulder, hip, and knee to track crunch motion
-    r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-    r_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
-    r_knee = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value]
+    # Key landmarks: shoulder, hip, ankle (left side)
+    ls = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+    lh = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
+    la = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value]
 
-    l_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-    l_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-    l_knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
-
-    # Visibility check
-    min_visibility = 0.5
-    if min(
-        visible(r_shoulder), visible(r_hip), visible(r_knee),
-        visible(l_shoulder), visible(l_hip), visible(l_knee)
-    ) < min_visibility:
+    min_vis = 0.6
+    if visible(ls) < min_vis or visible(lh) < min_vis or visible(la) < min_vis:
+        # Skip frame if low visibility
         return stage, rep_count, 0
 
-    # Calculate torso angle relative to hip and knee
-    angle_r = calculate_angle(r_shoulder, r_hip, r_knee)
-    angle_l = calculate_angle(l_shoulder, l_hip, l_knee)
-    avg_crunch_angle = (angle_r + angle_l) / 2
+    # Calculate hip angle = angle at hip joint formed by shoulder-hip-ankle
+    hip_angle = calculate_angle(ls, lh, la)
+    print(f"Lying Leg Raise Hip Angle: {hip_angle:.2f}, Stage: {stage}, Reps: {rep_count}")
 
-    # Thresholds
-    crunch_down_thresh = 150  # lying down (angle open)
-    crunch_up_thresh = 100    # curled (angle closed)
+    # Thresholds (tune for your setup)
+    down_thresh = 160   # Leg down (close to lying flat)
+    up_thresh = 100     # Leg lifted up (hip flexion decreases angle)
 
-    # Initial stage detection
+    # Initialize stage if None
     if stage is None:
-        if avg_crunch_angle > crunch_down_thresh:
-            stage = "down"
-        elif avg_crunch_angle < crunch_up_thresh:
+        if hip_angle < up_thresh:
             stage = "up"
+        elif hip_angle > down_thresh:
+            stage = "down"
 
     # Rep counting logic
-    if stage == "down" and avg_crunch_angle < crunch_up_thresh:
+    if stage == "down" and hip_angle < up_thresh:
         stage = "up"
         rep_count += 1
-        print(f"Crunch rep count: {rep_count}")
-
-    elif stage == "up" and avg_crunch_angle > crunch_down_thresh:
+        print(f"Lying Leg Raise rep counted! Total: {rep_count}")
+    elif stage == "up" and hip_angle > down_thresh:
         stage = "down"
 
-    print(f"Curl Angle: {avg_crunch_angle:.2f}, Stage: {stage}")
-    return stage, rep_count, avg_crunch_angle
+    return stage, rep_count, hip_angle
 
-def Rows(landmarks, stage, rep_count, side):
-    # Helper to check visibility
+def ChestPress(landmarks, stage, rep_count):
     def visible(landmark):
         return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
 
-    if side.lower() == "right":
-        shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-        wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-    elif side.lower() == "left":
-        shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-        wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-    else:
+    # Use right side landmarks (can average both sides if you want)
+    r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+    r_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+    r_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+
+    min_vis = 0.6
+    if visible(r_shoulder) < min_vis or visible(r_elbow) < min_vis or visible(r_wrist) < min_vis:
         return stage, rep_count, 0
 
-    # Check visibility
-    min_visibility = 0.5
-    if min(visible(shoulder), visible(elbow), visible(wrist)) < min_visibility:
-        return stage, rep_count, 0
+    elbow_angle = calculate_angle(r_shoulder, r_elbow, r_wrist)
+    print(f"Chest Press Elbow Angle: {elbow_angle:.2f}, Stage: {stage}, Reps: {rep_count}")
 
-    # Calculate elbow pulling angle
-    elbow_angle = calculate_angle(shoulder, elbow, wrist)
+    # Thresholds (tune these)
+    down_thresh = 90    # arms bent at the bottom of press
+    up_thresh = 160     # arms extended at the top
 
-    # Define thresholds for rowing motion
-    row_extended_thresh = 160  # Arm extended
-    row_pulled_thresh = 70     # Arm pulled in
-
-    # Initial stage detection
+    # Initialize stage if None
     if stage is None:
-        if elbow_angle > row_extended_thresh:
-            stage = "forward"
-        elif elbow_angle < row_pulled_thresh:
-            stage = "pulled"
+        if elbow_angle > up_thresh:
+            stage = "up"
+        elif elbow_angle < down_thresh:
+            stage = "down"
 
     # Rep counting logic
-    if stage == "forward" and elbow_angle < row_pulled_thresh:
-        stage = "pulled"
+    if stage == "down" and elbow_angle > up_thresh:
+        stage = "up"
         rep_count += 1
-        print(f"Row rep count: {rep_count}")
+        print(f"Chest Press rep counted! Total: {rep_count}")
+    elif stage == "up" and elbow_angle < down_thresh:
+        stage = "down"
 
-    elif stage == "pulled" and elbow_angle > row_extended_thresh:
-        stage = "forward"
-
-    print(f"Row Arm Angle: {elbow_angle:.2f}, Stage: {stage}")
     return stage, rep_count, elbow_angle
 
-def ChestPress(landmarks, stage, rep_count, side):
-    # Helper for visibility
+def BicepCurl(landmarks, stage, rep_count):
     def visible(landmark):
         return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
 
-    if side.lower() == "right":
-        shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-        wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-    elif side.lower() == "left":
-        shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-        elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-        wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-    else:
+    # Use right arm landmarks (you can do left or average both)
+    r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+    r_elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+    r_wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+
+    min_vis = 0.6
+    if min(visible(r_shoulder), visible(r_elbow), visible(r_wrist)) < min_vis:
         return stage, rep_count, 0
 
-    # Visibility check
-    min_visibility = 0.5
-    if min(visible(shoulder), visible(elbow), visible(wrist)) < min_visibility:
-        return stage, rep_count, 0
-
-    # Elbow angle represents push vs lowered arms
-    elbow_angle = calculate_angle(shoulder, elbow, wrist)
+    # Calculate elbow angle
+    angle = calculate_angle(r_shoulder, r_elbow, r_wrist)
+    print(f"Bicep Curl Angle: {angle:.2f}, Stage: {stage}, Reps: {rep_count}")
 
     # Thresholds
-    press_down_thresh = 90     # arms lowered
-    press_up_thresh = 160      # arms extended
+    down_thresh = 160  # arm extended
+    up_thresh = 50     # arm curled
 
     # Initial stage
     if stage is None:
-        if elbow_angle < press_down_thresh:
+        if angle > down_thresh:
             stage = "down"
-        elif elbow_angle > press_up_thresh:
-            stage = "up"
-
-    # Rep logic
-    if stage == "down" and elbow_angle > press_up_thresh:
-        stage = "up"
-        rep_count += 1
-        print(f"Chest Press rep count: {rep_count}")
-    elif stage == "up" and elbow_angle < press_down_thresh:
-        stage = "down"
-
-    print(f"Chest Press Arm Angle: {elbow_angle:.2f}, Stage: {stage}")
-    return stage, rep_count, elbow_angle
-
-def LegRaises(landmarks, stage, rep_count):
-    # Helper for visibility
-    def visible(landmark):
-        return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
-
-    # Get relevant landmarks for both legs
-    left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-    left_knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
-    left_ankle = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value]
-
-    right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
-    right_knee = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value]
-    right_ankle = landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value]
-
-    # Visibility check
-    min_visibility = 0.5
-    if min(visible(left_hip), visible(left_knee), visible(left_ankle),
-           visible(right_hip), visible(right_knee), visible(right_ankle)) < min_visibility:
-        return stage, rep_count, 0
-
-    # Calculate hip angles for both legs
-    left_leg_angle = calculate_angle(left_shoulder:=landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value],
-                                     left_hip, left_knee)
-    right_leg_angle = calculate_angle(right_shoulder:=landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value],
-                                      right_hip, right_knee)
-    
-    avg_leg_angle = (left_leg_angle + right_leg_angle) / 2
-
-    # Thresholds: low (legs near ground), high (legs vertical)
-    down_thresh = 100
-    up_thresh = 160
-
-    # Initial stage detection
-    if stage is None:
-        if avg_leg_angle < down_thresh:
-            stage = "down"
-        elif avg_leg_angle > up_thresh:
+        elif angle < up_thresh:
             stage = "up"
 
     # Rep counting logic
-    if stage == "down" and avg_leg_angle > up_thresh:
+    if stage == "down" and angle < up_thresh:
         stage = "up"
         rep_count += 1
-        print(f"Leg Raise rep count: {rep_count}")
-    elif stage == "up" and avg_leg_angle < down_thresh:
+        print(f"Bicep Curl rep counted! Total: {rep_count}")
+    elif stage == "up" and angle > down_thresh:
         stage = "down"
 
-    print(f"Leg Raise Angle: {avg_leg_angle:.2f}, Stage: {stage}")
-    return stage, rep_count, avg_leg_angle
+    return stage, rep_count, angle
+
+def Row(landmarks, stage, rep_count):
+    def visible(landmark):
+        return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
+
+    ls = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+    le = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
+    lw = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
+
+    elbow_angle = calculate_angle(ls, le, lw)
+
+    # Always print angle to debug
+    print(f"Row Elbow Angle: {elbow_angle:.2f}, Stage: {stage}, Reps: {rep_count}")
+
+    if min(visible(ls), visible(le), visible(lw)) < 0.6:
+        return stage, rep_count, elbow_angle  # still return angle so it displays on screen
+
+    # Rep counting thresholds (180° down, ~90° up)
+    if elbow_angle > 120:
+        stage = "down"
+    if elbow_angle < 70 and stage == "down":
+        stage = "up"
+        rep_count += 1
+        print(f"Row rep counted! Total: {rep_count}")
+
+    return stage, rep_count, elbow_angle
+
+
+def Crunch(landmarks, stage, rep_count):
+    def visible(landmark):
+        return landmark.visibility if hasattr(landmark, 'visibility') else 1.0
+
+    # We'll use the angle between hip, shoulder, and ear to detect crunch motion
+    lh = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
+    ls = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+    le = landmarks[mp_pose.PoseLandmark.LEFT_EAR.value]
+
+    crunch_angle = calculate_angle(lh, ls, le)
+
+    print(f"Crunch Angle: {crunch_angle:.2f}, Stage: {stage}, Reps: {rep_count}")
+
+    if min(visible(lh), visible(ls), visible(le)) < 0.6:
+        return stage, rep_count, crunch_angle
+
+    # Based on your actual values, adjust thresholds:
+    if crunch_angle > 122:
+        stage = "down"
+    if crunch_angle < 110 and stage == "down":
+        stage = "up"
+        rep_count += 1
+        print(f"Crunch rep counted! Total: {rep_count}")
+
+    return stage, rep_count, crunch_angle
 
 # ----------------------------- Main Code -----------------------------
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 # Load video file
-cap = cv2.VideoCapture(r"C:\Users\harsh\OneDrive\Desktop\Self-Care-Chatbot\Data\pushup_data\allex\deadlift.webm")
+cap = cv2.VideoCapture(r"C:\Users\Hamster\Desktop\Life\Projects\exercise_assist\Exercise-Assistant\Data\crunch_data\crunch_1.webm")
 
 rep_count = 0
 stage = None
-exercise_mode = "Deadlift"
-
-#Bicep Curl input and initialisation
-if(exercise_mode=='BicepCurl'):
-    side=input('Enter side:') 
-stage = {"left": None, "right": None}
-rep_count = {"left": 0, "right": 0} 
+exercise_mode = "crunch"
 
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -511,32 +405,31 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 stage, rep_count, avg_knee_angle, avg_back_angle = Deadlift(landmarks, stage, rep_count)
                 cv2.putText(frame, f'Deadlift Angle: {int(avg_knee_angle)}',(30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
-            elif exercise_mode == "Bicep Curl":
-                stage, rep_count, left_angle, right_angle = BicepCurl(landmarks, stage, rep_count, side="both")
-                cv2.putText(frame, f'Left Elbow: {int(left_angle)}', (30, 150),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 255), 2)
-                cv2.putText(frame, f'Right Elbow: {int(right_angle)}', (30, 190),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 255), 2)
             elif exercise_mode == "Glute Bridge":
-                stage, rep_count, hip_angle, _ = GluteBridge(landmarks, stage, rep_count)
+                stage, rep_count, hip_angle = GluteBridge(landmarks, stage, rep_count)
                 cv2.putText(frame, f'Hip Angle: {int(hip_angle)}', (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 180), 2)
-            elif exercise_mode == "Crunches":
-                stage, rep_count, avg_crunch_angle = Crunches(landmarks, stage, rep_count)
-                cv2.putText(frame, f'Crunch Angle: {int(avg_crunch_angle)}', (30, 150),
+            elif exercise_mode == "LyingLegRaise":
+                stage, rep_count, hip_angle = LyingLegRaise(landmarks, stage, rep_count)
+                cv2.putText(frame, f'Lying Leg Raise Angle: {int(hip_angle)}', (30, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
+            elif exercise_mode == "ChestPress":
+                stage, rep_count, elbow_angle = ChestPress(landmarks, stage, rep_count)
+                cv2.putText(frame, f'Chest Press Angle: {int(elbow_angle)}', (30, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
+            elif exercise_mode == "BicepCurl":
+                stage, rep_count, curl_angle = BicepCurl(landmarks, stage, rep_count)
+                cv2.putText(frame, f'Bicep Curl Angle: {int(curl_angle)}', (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
             elif exercise_mode == "Rows":
-                stage, rep_count, elbow_angle = Rows(landmarks, stage, rep_count, side)
-                cv2.putText(frame, f'Row Arm Angle: {int(elbow_angle)}', (30, 150),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 200, 0), 2)
-            elif exercise_mode == "Chest Press":
-                stage, rep_count, elbow_angle = ChestPress(landmarks, stage, rep_count, side)
-                cv2.putText(frame, f'Chest Press Angle: {int(elbow_angle)}', (30, 150),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 100, 255), 2)
-            elif exercise_mode == "Leg Raises":
-                stage, rep_count, leg_angle = LegRaises(landmarks, stage, rep_count)
-                cv2.putText(frame, f'Leg Raise Angle: {int(leg_angle)}', (30, 150),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (100, 255, 200), 2)
+                stage, rep_count, elbow_angle = Row(landmarks, stage, rep_count)
+                cv2.putText(frame, f'Row Angle: {int(elbow_angle)}', (30, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 0), 2)
+            elif exercise_mode == "crunch":
+                stage, rep_count, avg_angle = Crunch(landmarks, stage, rep_count)
+                cv2.putText(frame, f'Crunch Angle: {int(avg_angle)}', (30, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
+
 
             # Draw landmarks
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
