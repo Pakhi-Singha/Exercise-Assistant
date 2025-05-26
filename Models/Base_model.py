@@ -1,6 +1,10 @@
 import cv2
 import mediapipe as mp
 import math
+#push ups and crunches work on web cam
+#other exercises either have vertical positioning or the face is not visible so they will require a phone app
+#as phones can auto-rotate the display for vertical positions and zoom out to make face visible
+#other exercises can be tested on laptop by inputting the respective video from test_data folder
 
 # ----------------------------- Function to calculate angle -----------------------------
 def calculate_angle(a, b, c):
@@ -369,12 +373,20 @@ def Crunch(landmarks, stage, rep_count):
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# Load video file
-cap = cv2.VideoCapture(r"C:\Users\Hamster\Desktop\Life\Projects\exercise_assist\Exercise-Assistant\Data\crunch_data\crunch_1.webm")
+# Get user input for exercise mode
+exercise_mode = input("Enter the exercise mode (e.g., crunch, pushup): ").strip().lower()
+
+# Open the webcam (0 is usually the default camera)
+cap = cv2.VideoCapture(0)
+
+# Optional: Check if the webcam opened successfully
+if not cap.isOpened():
+    print("Error: Unable to access the webcam.")
+else:
+    print(f"Webcam accessed successfully. Exercise mode set to: {exercise_mode}")
 
 rep_count = 0
 stage = None
-exercise_mode = "crunch"
 
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -413,7 +425,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 stage, rep_count, hip_angle = LyingLegRaise(landmarks, stage, rep_count)
                 cv2.putText(frame, f'Lying Leg Raise Angle: {int(hip_angle)}', (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
-            elif exercise_mode == "ChestPress":
+            elif exercise_mode == "InclineChestPress":
                 stage, rep_count, elbow_angle = ChestPress(landmarks, stage, rep_count)
                 cv2.putText(frame, f'Chest Press Angle: {int(elbow_angle)}', (30, 150),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
