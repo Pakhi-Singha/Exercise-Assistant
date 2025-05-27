@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -31,9 +32,23 @@ const Navbar = () => {
             <a href="#contact" className="text-gray-700 hover:text-[#E7473C] px-3 py-2 text-sm font-medium">
               Contact Us
             </a>
-            <button className="bg-[#E7473C] hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-              Get Started
-            </button>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <div className="flex items-center space-x-4">
+                <SignInButton mode="modal">
+                  <button className="text-gray-700 hover:text-[#E7473C] px-3 py-2 text-sm font-medium">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="bg-[#E7473C] hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
           </div>
           
           {/* Mobile menu button */}
@@ -76,9 +91,25 @@ const Navbar = () => {
             <a href="#contact" className="block text-gray-700 hover:text-[#E7473C] px-3 py-2 text-base font-medium">
               Contact Us
             </a>
-            <button className="w-full mt-2 bg-[#E7473C] hover:bg-red-600 text-white px-4 py-2 rounded-md text-base font-medium">
-              Get Started
-            </button>
+            <SignedIn>
+              <div className="px-3 py-2">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <div className="space-y-2 px-3 py-2">
+                <SignInButton mode="modal">
+                  <button className="w-full text-left text-gray-700 hover:text-[#E7473C] px-3 py-2 text-base font-medium">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="w-full bg-[#E7473C] hover:bg-red-600 text-white px-4 py-2 rounded-md text-base font-medium">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
           </div>
         </div>
       )}
