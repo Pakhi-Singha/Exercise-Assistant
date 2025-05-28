@@ -4,8 +4,10 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FallbackPage from './components/FallbackPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import PlannerTabs from './components/PlannerTabs';
 import './App.css';
 import FitnessPlannerPage from './pages/FitnessPlannerPage';
+import { ClerkProvider } from '@clerk/clerk-react';
 
 // Lazy load components
 const HeroSection = lazy(() => import('./components/HeroSection'));
@@ -16,6 +18,8 @@ const FaqSection = lazy(() => import('./components/FaqSection'));
 const TrainersPage = lazy(() => import('./pages/TrainersPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const VideoCallPage = lazy(() => import('./pages/VideoCallPage'));
+const WorkoutPlannerPage = lazy(() => import('./pages/WorkoutPlannerPage'));
+const MealPlannerPage = lazy(() => import('./pages/MealPlannerPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -23,6 +27,9 @@ const LoadingSpinner = () => (
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#178582]"></div>
   </div>
 );
+
+// Replace the environment variable with direct key
+const clerkPubKey = "pk_test_dmFsdWVkLXNoZXBoZXJkLTkuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 function HomePage() {
   return (
@@ -38,39 +45,64 @@ function HomePage() {
   );
 }
 
+function PlannerLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PlannerTabs />
+        <div className="mt-6">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      <Navbar />
-      <div className="flex-grow w-full">
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes location={location}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/trainers" element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <TrainersPage />
-                </Suspense>
-              } />
-              <Route path="/booking/:trainerId" element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <BookingPage />
-                </Suspense>
-              } />
-              <Route path="/video-call/:sessionId" element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <VideoCallPage />
-                </Suspense>
-              } />
-              <Route path="/fitness-planner" element={<FitnessPlannerPage />} />
-              <Route path="*" element={<FallbackPage />} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
-      </div>
-      <Footer />
-    </div>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <ErrorBoundary>
+        <div className="min-h-screen w-full flex flex-col">
+          <Navbar />
+          <div className="flex-grow w-full">
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes location={location}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/trainers" element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <TrainersPage />
+                  </Suspense>
+                } />
+                <Route path="/booking/:trainerId" element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <BookingPage />
+                  </Suspense>
+                } />
+                <Route path="/video-call/:sessionId" element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <VideoCallPage />
+                  </Suspense>
+                } />
+                <Route path="/workout-planner" element={
+                  <PlannerLayout>
+                    <WorkoutPlannerPage />
+                  </PlannerLayout>
+                } />
+                <Route path="/meal-planner" element={
+                  <PlannerLayout>
+                    <MealPlannerPage />
+                  </PlannerLayout>
+                } />
+                <Route path="/fitness-planner" element={<FitnessPlannerPage />} />
+                <Route path="*" element={<FallbackPage />} />
+              </Routes>
+            </Suspense>
+          </div>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    </ClerkProvider>
   );
 }

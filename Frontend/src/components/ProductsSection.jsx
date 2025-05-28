@@ -129,9 +129,12 @@ const ProductsSection = () => {
                 <span>Grocery lists and meal prep guides</span>
               </li>
             </ul>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300">
+            <Link 
+              to="/workout-planner" 
+              className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300"
+            >
               Create Your Plan
-            </button>
+            </Link>
           </div>
           <div className="md:w-1/2">
             <img 
