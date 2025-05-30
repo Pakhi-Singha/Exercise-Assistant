@@ -58,50 +58,6 @@ const ProductsSection = () => {
           </div>
         </div>
         
-       {/* Appointment booking section */}
-        <div className="flex flex-col md:flex-row-reverse items-center mb-20">
-          <div className="md:w-1/2 mb-8 md:mb-0 md:pl-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Book an Appointment with Professionals</h3>
-            <p className="text-lg text-gray-600 mb-6">
-              Connect with certified trainers, nutritionists, and physiotherapists to get personalized guidance for your fitness journey.
-            </p>
-            <ul className="space-y-3 mb-8">
-              <li className="flex items-start">
-                <svg className="h-6 w-6 text-[#178582] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Easy scheduling system</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-6 w-6 text-[#178582] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Video consultations available</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-6 w-6 text-[#178582] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Verified fitness professionals</span>
-              </li>
-            </ul>
-            <Link to="/trainers" className="inline-block bg-[#178582] hover:bg-teal-700 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300">
-              Book Now
-            </Link>
-          </div>
-          <div className="md:w-1/2">
-            <img 
-              src={productImage2} 
-              alt="Professional Appointment Booking" 
-              className="rounded-lg shadow-xl"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/600x400?text=Appointment+Booking';
-              }}
-            />
-          </div>
-        </div>
-        
         {/* meal planner and workout planner section */}
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0 md:pr-12">

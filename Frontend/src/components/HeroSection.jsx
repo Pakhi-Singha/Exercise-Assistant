@@ -49,23 +49,12 @@ const HeroSection = () => {
                   <span className="font-medium">AI Posture Correction</span>
                 </div>
               </div>
-              
-              <div className="absolute -top-5 -right-5 bg-white p-4 rounded-lg shadow-md">
-                <div className="flex items-center">
-                  <div className="bg-[#178582] p-2 rounded-full mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium">Pro Appointments</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
         
         {/* Feature cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
             <div className="bg-red-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#E7473C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,18 +65,6 @@ const HeroSection = () => {
             <h3 className="text-xl font-semibold mb-2">Correct Your Pose</h3>
             <p className="text-gray-600">
               AI-powered posture correction tool that provides real-time feedback to improve your form during workouts.
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
-            <div className="bg-teal-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#178582]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Book an Appointment</h3>
-            <p className="text-gray-600">
-              Easy scheduling for personal trainers or physiotherapists to get professional guidance for your fitness journey.
             </p>
           </div>
           

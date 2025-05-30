@@ -14,11 +14,7 @@ const FaqSection = () => {
     },
     {
       question: "Can I use FitBro without an internet connection?",
-      answer: "Some features of FitBro require an internet connection, such as booking appointments with professionals and syncing your data across devices. However, basic workout tracking and saved meal plans can be accessed offline. The posture correction feature requires an internet connection for the initial AI model loading but can work offline for short periods afterward."
-    },
-    {
-      question: "Are the fitness professionals on the platform certified?",
-      answer: "Yes, all fitness professionals on our platform undergo a thorough verification process. We verify their certifications, qualifications, and experience before they can offer services through FitBro. You can view their credentials, specializations, and client reviews on their profile pages."
+      answer: "Some features of FitBro require an internet connection, such as syncing your data across devices. However, basic workout tracking and saved meal plans can be accessed offline. The posture correction feature requires an internet connection for the initial AI model loading but can work offline for short periods afterward."
     },
     {
       question: "How personalized are the meal and workout plans?",

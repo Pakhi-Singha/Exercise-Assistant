@@ -527,7 +527,10 @@ const WorkoutPlannerPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <WorkoutPlanResults plan={workoutPlan} onBack={handleBackToForm} />
+          <PlannerTabs />
+          <div className="mt-8">
+            <WorkoutPlanResults plan={workoutPlan} onBack={handleBackToForm} />
+          </div>
         </div>
       </div>
     );
@@ -536,7 +539,8 @@ const WorkoutPlannerPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6 md:p-8">
+        <PlannerTabs />
+        <div className="mt-8 bg-white shadow rounded-lg p-6 md:p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Your Workout Plan</h2>
           
           {error && (

@@ -15,9 +15,6 @@ const ProductsSection = lazy(() => import('./components/ProductsSection'));
 const WhyUsSection = lazy(() => import('./components/WhyUsSection'));
 const ContactSection = lazy(() => import('./components/ContactSection'));
 const FaqSection = lazy(() => import('./components/FaqSection'));
-const TrainersPage = lazy(() => import('./pages/TrainersPage'));
-const BookingPage = lazy(() => import('./pages/BookingPage'));
-const VideoCallPage = lazy(() => import('./pages/VideoCallPage'));
 const WorkoutPlannerPage = lazy(() => import('./pages/WorkoutPlannerPage'));
 const MealPlannerPage = lazy(() => import('./pages/MealPlannerPage'));
 
@@ -70,21 +67,6 @@ export default function App() {
             <Suspense fallback={<LoadingSpinner />}>
               <Routes location={location}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/trainers" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <TrainersPage />
-                  </Suspense>
-                } />
-                <Route path="/booking/:trainerId" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <BookingPage />
-                  </Suspense>
-                } />
-                <Route path="/video-call/:sessionId" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <VideoCallPage />
-                  </Suspense>
-                } />
                 <Route path="/workout-planner" element={
                   <PlannerLayout>
                     <WorkoutPlannerPage />
