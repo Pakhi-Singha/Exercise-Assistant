@@ -1,0 +1,67 @@
+/* style.css */
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 2rem;
+}
+
+h1 {
+  color: #e10600; /* strong red */
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-protein {
+  background-color: #B22222; /* Firebrick red, deep and warm like steak */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.btn-protein:hover {
+  background-color: #8B1A1A; /* Slightly darker on hover */
+}
+
+
+label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+select {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 2px solid #e10600;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+}
+
+video {
+  margin-top: 2rem;
+  border: 4px solid #e10600;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.5);
+}
+
+p {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+span {
+  font-weight: bold;
+  color: #e10600;
+}
