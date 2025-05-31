@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exercise Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Exercise Counter</h1>
+
+  <!-- Dropdown menu for selecting exercise -->
+  <label for="exercise">Choose an exercise:</label>
+  <select id="exercise">
+    <option value="Rest">Rest</option>
+    <option value="Pushup">Pushup</option>
+    <option value="Squats">Squats</option>
+    <option value="Deadlift">Deadlift</option>
+    <option value="GluteBridge">Glute Bridge</option>
+    <option value="LyingLegRaise">Lying Leg Raise</option>
+    <option value="ChestPress">Chest Press</option>
+    <option value="BicepCurl">Bicep Curl</option>
+    <option value="Row">Row</option>
+    <option value="Crunches">Crunches</option>
+    <option value="ShoulderShrug">Shoulder Shrug</option>
+    <option value="PlankHold">Plank Hold</option>
+    <option value="LateralRaise">Lateral Raise</option>
+    <option value="Lunges">Lunges</option>
+    <option value="JumpingJacks">Jumping Jacks</option>
+  </select>
+
+<a href="http://localhost:5001/protein" class="nav-link">Go to Protein Calculator</a>
+
+<style>
+  .nav-link {
+    color: #e10600; /* strong red */
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 15px;
+    border: 2px solid #e10600;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+
+  .nav-link:hover {
+    background-color: #e10600;
+    color: #000; /* black text on hover */
+  }
+</style>
+
+  <video id="video" width="640" height="480" autoplay muted></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <p>Reps: <span id="reps">0</span></p>
+  <p>Stage: <span id="stage">-</span></p>
+
+  
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
